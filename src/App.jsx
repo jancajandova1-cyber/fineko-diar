@@ -277,7 +277,7 @@ export default function App() {
       <div style={{ background: "#1e3a5f", color: "white", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 2px 8px rgba(0,0,0,0.15)" }}>
         <div>
           <div style={{ fontSize: 10, letterSpacing: 2, opacity: 0.6, textTransform: "uppercase" }}>Fineko Daně</div>
-          <div style={{ fontSize: 20, fontWeight: 700 }}>Účetní diář</div>
+          <div style={{ fontSize: 20, fontWeight: 700 }}>Účetní  diář</div>
           <div style={{ fontSize: 10, marginTop: 2, color: syncColor, fontWeight: 600 }}>{syncText}</div>
         </div>
         <div style={{ display: "flex", gap: 5, flexWrap: "wrap", justifyContent: "flex-end" }}>
