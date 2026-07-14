@@ -435,12 +435,13 @@
           {/* ÚKOLY */}
           {view==="tasks"&&(()=>{
             const groups={};
-            sorted.forEach(t=>{
+            sorted.filter(t=>!t.done).forEach(t=>{
               const [y,m]=t.date.split("-");
               const gk=`${y}-${parseInt(m)}`;
               if(!groups[gk]) groups[gk]={year:parseInt(y),month:parseInt(m),tasks:[]};
               groups[gk].tasks.push(t);
             });
+            const allDoneCount = sorted.filter(t=>t.done).length;
             return(
               <div style={{maxWidth:720,margin:"0 auto",padding:"20px 16px"}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
@@ -474,14 +475,20 @@
                     </div>
                   </div>
                 )}
+                {Object.keys(groups).length === 0 && (
+                  <div style={{background:"white",borderRadius:14,padding:30,textAlign:"center",boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:"1px solid #e2eaf2"}}>
+                    <div style={{fontSize:32,marginBottom:8}}>🎉</div>
+                    <div style={{fontSize:15,fontWeight:700,color:"#16a34a"}}>Všechny úkoly jsou hotové!</div>
+                    {allDoneCount > 0 && <div style={{fontSize:12,color:"#64748b",marginTop:4}}>Dokončeno: {allDoneCount} úkolů</div>}
+                  </div>
+                )}
                 {Object.keys(groups).sort().map(gk=>{
                   const {year,month,tasks:gt}=groups[gk];
-                  const ad=gt.every(t=>t.done);
                   return(
                     <div key={gk} style={{marginBottom:20}}>
                       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
                         <div style={{fontSize:16,fontWeight:700,color:"#1e3a5f"}}>📅 {gm(month)} {year}</div>
-                        <div style={{fontSize:11,fontWeight:600,borderRadius:10,padding:"2px 10px",background:ad?"#dcfce7":"#f1f5f9",color:ad?"#166534":"#64748b"}}>{gt.filter(t=>t.done).length}/{gt.length} hotovo</div>
+                        <div style={{fontSize:11,fontWeight:600,borderRadius:10,padding:"2px 10px",background:"#fff7ed",color:"#c2410c"}}>{gt.length} zbývá</div>
                       </div>
                       <div style={{background:"white",borderRadius:14,padding:20,boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:"1px solid #e2eaf2"}}>
                         {gt.map(task=>{
