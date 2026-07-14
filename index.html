@@ -90,6 +90,8 @@ function App() {
   const [showAdd, setShowAdd] = useState(false);
   const [showDone, setShowDone] = useState(false);
   const [newTask, setNewTask] = useState({ date: "", title: "", category: "účetnictví" });
+  const [editingId, setEditingId] = useState(null);
+  const [editText, setEditText] = useState("");
 
   useEffect(() => {
     loadData().then(data => {
@@ -166,6 +168,16 @@ function App() {
       save(checked, nt);
       return nt;
     });
+  }
+
+  function saveEdit(id) {
+    if (!editText.trim()) return;
+    setTasks(prev => {
+      const nt = prev.map(t => t.id === id ? { ...t, title: editText.trim() } : t);
+      save(checked, nt);
+      return nt;
+    });
+    setEditingId(null);
   }
 
   const showQ = isQ(cm);
@@ -501,17 +513,29 @@ function App() {
                       const cat=CAT[task.category]||CAT["účetnictví"];
                       const isPast=task.date<todayStr&&!task.done;
                       const isToday2=task.date===todayStr,done=task.done;
+                      const isEditing = editingId === task.id;
                       return(
-                        <div key={task.id} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 14px",borderRadius:8,background:done?"#f0fdf4":isPast?"#fff1f2":"#f8fafc",border:`1px solid ${done?"#bbf7d0":isPast?"#fecdd3":"#e2eaf2"}`,marginBottom:6}}>
-                          <div onClick={()=>toggleTask(task.id)} style={{width:22,height:22,borderRadius:6,border:`2px solid ${done?"#16a34a":isPast?"#f43f5e":"#94a3b8"}`,background:done?"#16a34a":"white",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,cursor:"pointer"}}>
-                            {done&&<span style={{color:"white",fontSize:13,lineHeight:1}}>✓</span>}
-                          </div>
-                          <div style={{flex:1,cursor:"pointer"}} onClick={()=>toggleTask(task.id)}>
-                            <div style={{fontSize:14,fontWeight:600,color:done?"#15803d":isPast?"#be123c":"#1e3a5f",textDecoration:done?"line-through":"none",opacity:done?0.7:1}}>{task.title}</div>
-                            <div style={{fontSize:11,color:done?"#16a34a":isPast?"#be123c":"#64748b",marginTop:2}}>{done?`✓ Hotovo • ${task.date}`:isToday2?"📅 Dnes":isPast?`⚠️ Prošlé – ${task.date}`:`📅 ${task.date}`}</div>
-                          </div>
-                          <span style={{fontSize:11,background:cat.bg,color:cat.text,border:`1px solid ${cat.border}`,borderRadius:10,padding:"2px 8px",fontWeight:600,flexShrink:0}}>{cat.label}</span>
-                          <button onClick={()=>deleteTask(task.id)} style={{background:"none",border:"none",cursor:"pointer",color:"#94a3b8",fontSize:16,padding:"0 4px",flexShrink:0}}>🗑</button>
+                        <div key={task.id} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 14px",borderRadius:8,background:done?"#f0fdf4":isPast?"#fff1f2":"#f8fafc",border:`1px solid ${done?"#bbf7d0":isPast?"#fecdd3":isEditing?"#94a3b8":"#e2eaf2"}`,marginBottom:6}}>
+                          {isEditing?(
+                            <>
+                              <input type="text" value={editText} onChange={e=>setEditText(e.target.value)} autoFocus onKeyDown={e=>{if(e.key==="Enter")saveEdit(task.id);if(e.key==="Escape")setEditingId(null);}} style={{flex:1,padding:"7px 10px",borderRadius:6,border:"1px solid #94a3b8",fontSize:14,fontFamily:"inherit"}} />
+                              <button onClick={()=>saveEdit(task.id)} style={{background:"#16a34a",border:"none",borderRadius:6,color:"white",cursor:"pointer",fontSize:13,padding:"7px 12px",fontWeight:700,flexShrink:0}}>✓</button>
+                              <button onClick={()=>setEditingId(null)} style={{background:"white",border:"1px solid #cbd5e1",borderRadius:6,cursor:"pointer",color:"#64748b",fontSize:13,padding:"7px 12px",flexShrink:0}}>✕</button>
+                            </>
+                          ):(
+                            <>
+                              <div onClick={()=>toggleTask(task.id)} style={{width:22,height:22,borderRadius:6,border:`2px solid ${done?"#16a34a":isPast?"#f43f5e":"#94a3b8"}`,background:done?"#16a34a":"white",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,cursor:"pointer"}}>
+                                {done&&<span style={{color:"white",fontSize:13,lineHeight:1}}>✓</span>}
+                              </div>
+                              <div style={{flex:1,cursor:"pointer"}} onClick={()=>toggleTask(task.id)}>
+                                <div style={{fontSize:14,fontWeight:600,color:done?"#15803d":isPast?"#be123c":"#1e3a5f",textDecoration:done?"line-through":"none",opacity:done?0.7:1}}>{task.title}</div>
+                                <div style={{fontSize:11,color:done?"#16a34a":isPast?"#be123c":"#64748b",marginTop:2}}>{done?`✓ Hotovo • ${task.date}`:isToday2?"📅 Dnes":isPast?`⚠️ Prošlé – ${task.date}`:`📅 ${task.date}`}</div>
+                              </div>
+                              <span style={{fontSize:11,background:cat.bg,color:cat.text,border:`1px solid ${cat.border}`,borderRadius:10,padding:"2px 8px",fontWeight:600,flexShrink:0}}>{cat.label}</span>
+                              <button onClick={()=>{setEditingId(task.id);setEditText(task.title);}} style={{background:"none",border:"none",cursor:"pointer",color:"#94a3b8",fontSize:15,padding:"0 4px",flexShrink:0}}>✏️</button>
+                              <button onClick={()=>deleteTask(task.id)} style={{background:"none",border:"none",cursor:"pointer",color:"#94a3b8",fontSize:16,padding:"0 4px",flexShrink:0}}>🗑</button>
+                            </>
+                          )}
                         </div>
                       );
                     })}
