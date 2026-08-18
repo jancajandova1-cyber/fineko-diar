@@ -23,7 +23,7 @@ jobs:
       - name: Smazat staré zálohy (ponechat posledních 5)
         run: |
           cd backups
-          ls -1 zaloha-*.json 2>/dev/null | sort | head -n -5 | xargs -r rm --
+          ls -1 zaloha-*.json 2>/dev/null | sort | head -n -5 | xargs -r rm -- || true
           cd ..
 
       - name: Uložit zálohu do repozitáře
@@ -33,3 +33,4 @@ jobs:
           git add backups/
           git diff --cached --quiet || git commit -m "Automatická záloha $(date +%Y-%m-%d)"
           git push
+
