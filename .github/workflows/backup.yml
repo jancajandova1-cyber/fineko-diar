@@ -20,6 +20,12 @@ jobs:
             -H "apikey: sb_publishable_wwhe8J8IcQiSX6Y36DXiwg_JANio2XX" \
             -o "backups/zaloha-$(date +%Y-%m-%d).json"
 
+      - name: Smazat staré zálohy (ponechat posledních 5)
+        run: |
+          cd backups
+          ls -1 zaloha-*.json 2>/dev/null | sort | head -n -5 | xargs -r rm --
+          cd ..
+
       - name: Uložit zálohu do repozitáře
         run: |
           git config user.name "Zálohovací robot"
