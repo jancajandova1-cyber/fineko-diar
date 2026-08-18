@@ -1,0 +1,29 @@
+name: Automatická záloha diáře
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stáhnout data z databáze
+        run: |
+          mkdir -p backups
+          curl -s "https://wvqfiqgeqzobhcrltkzi.supabase.co/rest/v1/diar_data?select=id,data" \
+            -H "apikey: sb_publishable_wwhe8J8IcQiSX6Y36DXiwg_JANio2XX" \
+            -o "backups/zaloha-$(date +%Y-%m-%d).json"
+
+      - name: Uložit zálohu do repozitáře
+        run: |
+          git config user.name "Zálohovací robot"
+          git config user.email "actions@github.com"
+          git add backups/
+          git diff --cached --quiet || git commit -m "Automatická záloha $(date +%Y-%m-%d)"
+          git push
