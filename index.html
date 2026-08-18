@@ -180,6 +180,19 @@ function App() {
     setEditingId(null);
   }
 
+  function exportBackup() {
+    const backup = { exported_at: new Date().toISOString(), checked, tasks };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `zaloha-diar-${new Date().toISOString().split("T")[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   const showQ = isQ(cm);
   const mDone = MONTHLY_FIRMS.filter(f => mc[`monthly-${f}`]).length;
   const qDone = showQ ? QUARTERLY_FIRMS.filter(f => mc[`quarterly-${f}`]).length : 0;
@@ -258,12 +271,13 @@ function App() {
           <div style={{fontSize:20,fontWeight:700}}>Účetní diář</div>
           <div style={{fontSize:10,marginTop:2,color:syncColor,fontWeight:600}}>{syncText}</div>
         </div>
-        <div style={{display:"flex",gap:5,flexWrap:"wrap",justifyContent:"flex-end"}}>
+        <div style={{display:"flex",gap:5,flexWrap:"wrap",justifyContent:"flex-end",alignItems:"center"}}>
           {nb("Týden","week")}
           {nb("Měsíc","month")}
           {nb("Přehled","overview")}
           {nb("Přiznání","tax")}
           {nb("Úkoly","tasks")}
+          <button onClick={exportBackup} title="Stáhnout zálohu dat" style={{padding:"6px 10px",borderRadius:8,border:"none",cursor:"pointer",background:"rgba(255,255,255,0.15)",color:"white",fontWeight:600,fontSize:12}}>📥</button>
         </div>
       </div>
 
