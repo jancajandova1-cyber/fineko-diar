@@ -42,6 +42,8 @@ const MONTHLY_FIRMS = [
 ];
 const QUARTERLY_FIRMS = ["Dušek Jaroslav", "Janda Petr", "Jandová Jana", "Mušková Dana", "Pavlíček Dušan"];
 const QUARTER_MONTHS = [4, 7, 10, 1];
+// Seznam měsíčních plátců (m = měsíc podání). Pan Drbohlav končí od přiznání za 10/2026, tj. od podání v 11/2026
+const monthlyFor = (m, y) => MONTHLY_FIRMS.filter(f => !(f === "Drbohlav Jakub, Ing." && y*12+m >= 2026*12+11));
 const ALL_FIRMS_TAX = [...MONTHLY_FIRMS, ...QUARTERLY_FIRMS.filter(f => f !== "Mušková Dana")].sort((a, b) => a.localeCompare(b, "cs"));
 
 const INITIAL_TASKS = [
@@ -194,7 +196,8 @@ function App() {
   }
 
   const showQ = isQ(cm);
-  const mDone = MONTHLY_FIRMS.filter(f => mc[`monthly-${f}`]).length;
+  const MF = monthlyFor(cm, cy);
+  const mDone = MF.filter(f => mc[`monthly-${f}`]).length;
   const qDone = showQ ? QUARTERLY_FIRMS.filter(f => mc[`quarterly-${f}`]).length : 0;
   const sorted = [...tasks].sort((a,b) => new Date(a.date)-new Date(b.date));
 
@@ -214,11 +217,12 @@ function App() {
     tasks.forEach(t => { if (t.date === ds) ev.push({type:"task",task:t}); });
     if (date.getDate() === 25) {
       const mch = checked[`${y}-${m}`] || {};
-      const md2 = MONTHLY_FIRMS.filter(f => mch[`monthly-${f}`]).length;
+      const mfm = monthlyFor(m, y);
+      const md2 = mfm.filter(f => mch[`monthly-${f}`]).length;
       const sk = !!mch[`monthly-Building s.r.o.-SK`];
       const iq = isQ(m);
       const qd = iq ? QUARTERLY_FIRMS.filter(f => mch[`quarterly-${f}`]).length : 0;
-      const tot = MONTHLY_FIRMS.length+1+(iq?QUARTERLY_FIRMS.length:0);
+      const tot = mfm.length+1+(iq?QUARTERLY_FIRMS.length:0);
       ev.push({type:"dph",month:m,year:y,done:md2+(sk?1:0)+qd,total:tot,isQ:iq});
     }
     if (date.getDate()===30&&m===4&&y===2027) ev.push({type:"tax",done:taxDone,total:ALL_FIRMS_TAX.length});
@@ -377,9 +381,9 @@ function App() {
                 <div style={{fontSize:15,fontWeight:700,color:"#1e3a5f"}}>📋 DPH & KH – měsíční plátci</div>
                 <div style={{fontSize:12,color:"#64748b",marginTop:2}}>Termín: 25. {gm(cm)} {cy} – za {prevMN(cm,cy)}</div>
               </div>
-              <div style={{background:mDone===MONTHLY_FIRMS.length?"#dcfce7":"#f1f5f9",color:mDone===MONTHLY_FIRMS.length?"#166534":"#64748b",borderRadius:20,padding:"4px 12px",fontSize:13,fontWeight:700}}>{mDone}/{MONTHLY_FIRMS.length}</div>
+              <div style={{background:mDone===MF.length?"#dcfce7":"#f1f5f9",color:mDone===MF.length?"#166534":"#64748b",borderRadius:20,padding:"4px 12px",fontSize:13,fontWeight:700}}>{mDone}/{MF.length}</div>
             </div>
-            <FirmList firms={MONTHLY_FIRMS} type="monthly" />
+            <FirmList firms={MF} type="monthly" />
           </div>
           {showQ&&(
             <div style={{background:"white",borderRadius:14,padding:20,marginBottom:16,boxShadow:"0 1px 4px rgba(0,0,0,0.08)",border:"1px solid #e2eaf2"}}>
@@ -404,9 +408,10 @@ function App() {
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:12}}>
             {Array.from({length:12},(_,i)=>i+1).map(month=>{
               const mk=`${cy}-${month}`,mch=checked[mk]||{};
-              const md2=MONTHLY_FIRMS.filter(f=>mch[`monthly-${f}`]).length;
+              const mfo=monthlyFor(month,cy);
+              const md2=mfo.filter(f=>mch[`monthly-${f}`]).length;
               const iq=isQ(month),qd=iq?QUARTERLY_FIRMS.filter(f=>mch[`quarterly-${f}`]).length:0;
-              const tot=MONTHLY_FIRMS.length+(iq?QUARTERLY_FIRMS.length:0);
+              const tot=mfo.length+(iq?QUARTERLY_FIRMS.length:0);
               const done=md2+qd,ad=done===tot;
               const isNow=month===today.getMonth()+1&&cy===today.getFullYear();
               return(
